@@ -1,4 +1,5 @@
 package com.example.preferans
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -81,6 +82,18 @@ class GameViewModel : ViewModel() {
 
             // Notify observers of the updated game state
             _game.value = game
+        }
+    }
+    fun saveState(outState: Bundle) {
+        outState.putParcelable("game_state", game.value)
+    }
+
+    fun restoreState(savedInstanceState: Bundle?) {
+        savedInstanceState?.let {
+            val restoredGame: Game? = savedInstanceState.getParcelable("game_state")
+            if (restoredGame != null) {
+                _game.value = restoredGame!!
+            }
         }
     }
     // Add other methods to interact with the game and update LiveData objects

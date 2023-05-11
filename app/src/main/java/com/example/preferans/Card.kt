@@ -15,6 +15,6 @@ data class Card(val suit: Suit, val rank: Rank) {
         }
     }
     fun fileName(): String {
-        return if(rank > Rank.TEN && rank < Rank.ACE) "${rank.name.lowercase()}_of_${suit.name.lowercase()}2" else "${rank.name.lowercase()}_of_${suit.name.lowercase()}"
+        return if(rank > Rank.TEN) "english_pattern_${rank.name.lowercase()}_of_${suit.name.lowercase()}" else "english_pattern_${rank.toString().lowercase()}_of_${suit.name.lowercase()}"
     }
 }

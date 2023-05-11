@@ -1,6 +1,10 @@
 package com.example.preferans
 
-class Game(val players: List<Player>) {
+import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
+
+class Game(val players: List<Player>): Parcelable {
     var deck : Deck = Deck()
     var bula = 100
     var currentPlayerIndex = 0
@@ -16,6 +20,16 @@ class Game(val players: List<Player>) {
     var currentBid : Int = 2*Bid.PASS.value
     var numOfBids = 0
     val log: MutableList<String> = mutableListOf()
+
+    constructor(parcel: Parcel) : this(parcel.createTypedArrayList(Player.CREATOR)!!) {
+        bula = parcel.readInt()
+        currentPlayerIndex = parcel.readInt()
+        dealerIndex = parcel.readInt()
+        firstRound = parcel.readByte() != 0.toByte()
+        secondRound = parcel.readByte() != 0.toByte()
+        currentBid = parcel.readInt()
+        numOfBids = parcel.readInt()
+    }
 
     init {
         // Initialize the scores map
@@ -124,5 +138,29 @@ class Game(val players: List<Player>) {
 
         winningBid = currentBid
         return winningBid
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(bula)
+        parcel.writeInt(currentPlayerIndex)
+        parcel.writeInt(dealerIndex)
+        parcel.writeByte(if (firstRound) 1 else 0)
+        parcel.writeByte(if (secondRound) 1 else 0)
+        parcel.writeInt(currentBid)
+        parcel.writeInt(numOfBids)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Game> {
+        override fun createFromParcel(parcel: Parcel): Game {
+            return Game(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Game?> {
+            return arrayOfNulls(size)
+        }
     }
 }

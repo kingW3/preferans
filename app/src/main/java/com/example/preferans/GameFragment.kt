@@ -63,4 +63,12 @@ class GameFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        viewModel.saveState(outState)
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.restoreState(savedInstanceState)
+    }
 }
