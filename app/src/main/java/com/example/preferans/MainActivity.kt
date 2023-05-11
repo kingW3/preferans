@@ -23,11 +23,6 @@ class MainActivity : AppCompatActivity() {
         val bidOptionsSpinner: Spinner = findViewById(R.id.bidOptions)
         val placeBidButton: Button = findViewById(R.id.placeBidButton)
         val gameLogTextView: TextView = findViewById(R.id.gameLog)
-        val selectGameButton: Button = findViewById(R.id.placeBidButton)
-        selectGameButton.setOnClickListener {
-            val intent = Intent(this, SelectGameActivity::class.java)
-            startActivity(intent)
-        }
         // Initialize game with player names
         viewModel.createNewGame(
             listOf(
