@@ -2,25 +2,7 @@ package com.example.preferans
 
 data class Card(val suit: Suit, val rank: Rank) {
     override fun toString(): String {
-        val rankSymbol = when (rank) {
-            Rank.SEVEN -> "7"
-            Rank.EIGHT -> "8"
-            Rank.NINE -> "9"
-            Rank.TEN -> "10"
-            Rank.JACK -> "J"
-            Rank.QUEEN -> "Q"
-            Rank.KING -> "K"
-            Rank.ACE -> "A"
-        }
-
-        val suitSymbol = when (suit) {
-            Suit.HEARTS -> "♥"
-            Suit.DIAMONDS -> "♦"
-            Suit.CLUBS -> "♣"
-            Suit.SPADES -> "♠"
-        }
-
-        return "$rankSymbol$suitSymbol"
+        return "${rank}${suit}"
     }
     val cardComparator = Comparator<Card> { card1, card2 ->
         val suitOrder = listOf(Suit.SPADES, Suit.HEARTS, Suit.CLUBS, Suit.DIAMONDS)
@@ -31,5 +13,8 @@ data class Card(val suit: Suit, val rank: Rank) {
         } else {
             card1.rank.compareTo(card2.rank)
         }
+    }
+    fun fileName(): String {
+        return if(rank > Rank.TEN && rank < Rank.ACE) "${rank.name.lowercase()}_of_${suit.name.lowercase()}2" else "${rank.name.lowercase()}_of_${suit.name.lowercase()}"
     }
 }
