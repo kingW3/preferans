@@ -19,6 +19,9 @@ class Game(val players: List<Player>): Parcelable {
     private val scores: MutableMap<Player, MutableMap<Player, Int>> = mutableMapOf()
     var currentBid : Int = 2*Bid.PASS.value
     var numOfBids = 0
+    var biddingOver = false
+    var defendingDecisionOver = false
+    var selectingGameOver = false
     val log: MutableList<String> = mutableListOf()
 
     constructor(parcel: Parcel) : this(parcel.createTypedArrayList(Player.CREATOR)!!) {
@@ -119,6 +122,23 @@ class Game(val players: List<Player>): Parcelable {
             throw IllegalArgumentException("Function shouldn't be called if there's only one GAME")
         }
     }
+
+    fun availableDecisions() : List<PlayerDecision> {
+        val nonVoters = players.filter { it.defendingDecision == PlayerDecision.NONE }
+        if(nonVoters.isEmpty())
+        {
+            val defenders = players.filter { it.defendingDecision == PlayerDecision.DEFEND }
+            if(defenders.size == 1) {
+                return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CALL_PARTNER || it == PlayerDecision.CONTRA }
+            }
+            else
+                return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CONTRA }
+        }
+        else
+        {
+            return PlayerDecision.values().filter { it == PlayerDecision.DEFEND || it == PlayerDecision.PASS }
+        }
+    }
     fun bidding1(): Bid {
         var passesInARow = 0
         var currentBid = Bid.PASS
@@ -138,6 +158,24 @@ class Game(val players: List<Player>): Parcelable {
 
         winningBid = currentBid
         return winningBid
+    }
+    fun startGame(selectedGame: Bid) {
+        // set up the game state
+        // ...
+
+        // start the game
+        // ...
+    }
+    fun playerDecisions(selectedGame: Bid): Map<Player, PlayerDecision> {
+        val decisions = mutableMapOf<Player, PlayerDecision>()
+        for (player in players) {
+            val decision = player.makeDecision(selectedGame) // makeDecision would be a method you implement in the Player class
+            decisions[player] = decision
+            if (decision == PlayerDecision.CONTRA) {
+                // handle doubling the points of the game
+            }
+        }
+        return decisions
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

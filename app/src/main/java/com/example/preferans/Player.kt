@@ -4,9 +4,10 @@ import android.os.Parcelable
 class Player(var name: String) : Parcelable {
     var hand : MutableList<Card> = mutableListOf()
     var bid : Bid = Bid.NONE
-
+    var defendingDecision : PlayerDecision = PlayerDecision.NONE
     constructor(parcel: Parcel) : this(parcel.readString()!!) {
-
+        hand = parcel.createTypedArrayList(Card.CREATOR)!!
+        bid = Bid.values()[parcel.readInt()]
     }
 
     fun playCard(cardIndex: Int): Card {
@@ -28,10 +29,21 @@ class Player(var name: String) : Parcelable {
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
+        parcel.writeTypedList(hand)
+        parcel.writeInt(bid.ordinal)
     }
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    fun makeDecision(selectedGame: Bid, ): PlayerDecision {
+        return PlayerDecision.PASS
+    }
+    fun decideDefend(playerDecision: PlayerDecision) : PlayerDecision
+    {
+        defendingDecision = playerDecision
+        return playerDecision
     }
 
     companion object CREATOR : Parcelable.Creator<Player> {

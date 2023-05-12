@@ -45,8 +45,8 @@ class GameFragment : Fragment() {
 
             // Update game log text view with game events
             binding.gameLogTextView.text = game.log.joinToString("\n")
-
-            val bidOptions = game.availableBids()
+            binding.placeBidButton.text = if(!game.biddingOver) "Place Bid" else if(!game.selectingGameOver) "Select Game" else "Decide"
+            val bidOptions = if(!game.biddingOver) game.availableBids() else if (!game.selectingGameOver) game.availableGames() else game.availableDecisions()
             val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item, bidOptions)
             spinnerAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
             binding.bidOptionsSpinner.adapter = spinnerAdapter

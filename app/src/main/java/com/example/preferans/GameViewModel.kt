@@ -22,7 +22,7 @@ class GameViewModel : ViewModel() {
             game.log.add("${game.currentPlayer.name} placed a bid of $bid")
 
             // Move to the next player and update the game state
-            moveToNextPlayer(game)
+            moveToNextPlayerBid(game)
 
             // Notify observers of the updated game state
             _game.value = game
@@ -31,7 +31,7 @@ class GameViewModel : ViewModel() {
 
     private fun updateBidCounter(game: Game) {
         ++game.numOfBids
-        if (game.numOfBids == game.players.size) {
+        if (game.numOfBids == game.players.size-1) {
             game.firstRound = false
         }
     }
@@ -44,7 +44,7 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    private fun moveToNextPlayer(game: Game) {
+    private fun moveToNextPlayerBid(game: Game) {
         var player = game.getNextPlayer()
         while (player.bid == Bid.PASS) {
             ++game.numOfBids
@@ -52,9 +52,15 @@ class GameViewModel : ViewModel() {
         }
         handlePlayerTurn(game, player)
     }
-
+    private fun moveToNextPlayerDefend(game: Game) {
+        var player = game.getNextPlayer()
+        if(player == game.winningBidPlayer)
+            player = game.getNextPlayer()
+        //val defenders =
+    }
     private fun handlePlayerTurn(game: Game, player: Player) {
         if (game.winningBidPlayer == player) {
+            game.biddingOver = true
             when {
                 player.bid < Bid.GAME -> {
                     handleWinningBid(game, player)
@@ -77,8 +83,38 @@ class GameViewModel : ViewModel() {
             game.selectedGame = selectedGame
             game.log.add("Selected game: $selectedGame")
 
-            // TODO: Implement the logic for the selected game
-            // ...
+            game.startGame(selectedGame)
+
+            // Notify observers of the updated game state
+            _game.value = game
+        }
+    }
+    private fun handleDecisions(decisions: Map<Player, PlayerDecision>) {
+        // handle the decisions here, for example:
+        val defenders = decisions.filter { it.value == PlayerDecision.DEFEND }.keys
+        if (defenders.isEmpty()) {
+            // the player who selected the game wins, handle this case
+        } else if (defenders.size == 1) {
+            // one player defends, they can choose to do it alone, call the other player or declare a contra
+            // handle this case
+        } else {
+            // handle other cases
+        }
+    }
+
+    private fun decideDefend(playerDecision: PlayerDecision)
+    {
+        game.value?.let { game ->
+            // Update the current player's bid
+            game.currentPlayer.decideDefend(playerDecision)
+            //updateBidCounter(game)
+            //updateWinningBid(game, bid)
+
+            // Add a log entry for the placed bid
+            //game.log.add("${game.currentPlayer.name} placed a bid of $bid")
+
+            // Move to the next player and update the game state
+            //moveToNextPlayer(game)
 
             // Notify observers of the updated game state
             _game.value = game
@@ -92,7 +128,7 @@ class GameViewModel : ViewModel() {
         savedInstanceState?.let {
             val restoredGame: Game? = savedInstanceState.getParcelable("game_state")
             if (restoredGame != null) {
-                _game.value = restoredGame!!
+                _game.postValue(restoredGame!!)
             }
         }
     }
