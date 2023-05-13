@@ -40,6 +40,7 @@ class Deck() {
     }
     fun addTalonToPlayer(player : Player) {
         player.hand.addAll(talon)
+        talon.clear()
         player.sortHand()
     }
 }

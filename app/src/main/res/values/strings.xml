@@ -2,4 +2,31 @@
     <string name="app_name">Preferans</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="bid_pass">Pass</string>
+    <string name="bid_none">None</string>
+    <string name="bid_spade">Spade</string>
+    <string name="bid_diamond">Diamond</string>
+    <string name="bid_heart">Heart</string>
+    <string name="bid_club">Club</string>
+    <string name="bid_betl">Betl</string>
+    <string name="bid_sans">Sans</string>
+    <string name="bid_preferans">Preferans</string>
+    <string name="bid_game">Game</string>
+    <string name="bid_game_spade">Game Spade</string>
+    <string name="bid_game_diamond">Game Diamond</string>
+    <string name="bid_game_heart">Game Heart</string>
+    <string name="bid_game_club">Game Club</string>
+    <string name="bid_game_betl">Game Betl</string>
+    <string name="bid_game_sans">Game Sans</string>
+    <string name="bid_game_preferans">Game Preferans</string>
+    <string name="player_decision_none">None</string>
+    <string name="player_decision_pass">Pass</string>
+    <string name="player_decision_defend">Defend</string>
+    <string name="player_decision_same">Same</string>
+    <string name="player_decision_call_partner">Call Partner</string>
+    <string name="player_decision_contra">Contra</string>
+    <string name="player_decision_recontra">Recontra</string>
+    <string name="player_decision_subcontra">Subcontra</string>
+    <string name="player_decision_mortcontra">Mortcontra</string>
+    <string name="talon">Talon</string>
 </resources>

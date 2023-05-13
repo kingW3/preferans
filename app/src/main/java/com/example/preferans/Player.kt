@@ -19,6 +19,15 @@ class Player(var name: String) : Parcelable {
         hand.removeAt(cardIndex)
         return playedCard
     }
+    fun discardCard(cardIndex: Int): Card {
+        if (cardIndex < 0 || cardIndex >= hand.size) {
+            throw IllegalArgumentException("Invalid card index.")
+        }
+
+        val playedCard = hand[cardIndex]
+        hand.removeAt(cardIndex)
+        return playedCard
+    }
     fun placeBid(bid: Bid) : Bid {
         this.bid = bid
         return bid

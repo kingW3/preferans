@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Preferans</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="bid_pass">Dalje</string>
+    <string name="bid_none">Nijedan</string>
+    <string name="bid_spade">Pik</string>
+    <string name="bid_diamond">Karo</string>
+    <string name="bid_heart">Herc</string>
+    <string name="bid_club">Tref</string>
+    <string name="bid_betl">Betl</string>
+    <string name="bid_sans">Sans</string>
+    <string name="bid_preferans">Preferans</string>
+    <string name="bid_game">Igra</string>
+    <string name="bid_game_spade">Igra - Pik</string>
+    <string name="bid_game_diamond">Igra - Karo</string>
+    <string name="bid_game_heart">Igra - Herc</string>
+    <string name="bid_game_club">Igra - Tref</string>
+    <string name="bid_game_betl">Igra - Betl</string>
+    <string name="bid_game_sans">Igra - Sans</string>
+    <string name="bid_game_preferans">Igra - Preferans</string>
+    <string name="player_decision_none">Nijedna</string>
+    <string name="player_decision_pass">Ne pratim</string>
+    <string name="player_decision_defend">Pratim</string>
+    <string name="player_decision_same">Isto</string>
+    <string name="player_decision_call_partner">Zovem partnera</string>
+    <string name="player_decision_contra">Kontra</string>
+    <string name="player_decision_recontra">Rekontra</string>
+    <string name="player_decision_subcontra">Subkontra</string>
+    <string name="player_decision_mortcontra">Mortkontra</string>
+    <string name="talon">Talon</string>
+</resources>

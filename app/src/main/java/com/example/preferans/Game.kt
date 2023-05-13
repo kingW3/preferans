@@ -9,6 +9,7 @@ class Game(val players: List<Player>): Parcelable {
     var bula = 100
     var currentPlayerIndex = 0
     val currentPlayer get() = players[currentPlayerIndex]
+    val defenders get() = players.filter { it != winningBidPlayer }
     var dealerIndex = 0
     var selectedGame : Bid = Bid.NONE
     val dealer get() = players[dealerIndex]
@@ -23,6 +24,7 @@ class Game(val players: List<Player>): Parcelable {
     var defendingDecisionOver = false
     var selectingGameOver = false
     val log: MutableList<String> = mutableListOf()
+    val logTalon: MutableList<String> = mutableListOf()
 
     constructor(parcel: Parcel) : this(parcel.createTypedArrayList(Player.CREATOR)!!) {
         bula = parcel.readInt()
@@ -124,20 +126,24 @@ class Game(val players: List<Player>): Parcelable {
     }
 
     fun availableDecisions() : List<PlayerDecision> {
-        val nonVoters = players.filter { it.defendingDecision == PlayerDecision.NONE }
+        val nonVoters = defenders.filter { it.defendingDecision == PlayerDecision.NONE}
+        val decisions = mutableListOf<PlayerDecision>()
         if(nonVoters.isEmpty())
         {
-            val defenders = players.filter { it.defendingDecision == PlayerDecision.DEFEND }
+            decisions.add(PlayerDecision.SAME)
+            decisions.add(PlayerDecision.CONTRA)
+            //TODO Implement Contra/ReContra/SubContra/MortContra into bidding
             if(defenders.size == 1) {
-                return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CALL_PARTNER || it == PlayerDecision.CONTRA }
+                decisions.add(PlayerDecision.CALL_PARTNER)
+                //return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CALL_PARTNER || it == PlayerDecision.CONTRA }
             }
-            else
-                return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CONTRA }
         }
         else
         {
-            return PlayerDecision.values().filter { it == PlayerDecision.DEFEND || it == PlayerDecision.PASS }
+            decisions.add(PlayerDecision.PASS)
+            decisions.add(PlayerDecision.DEFEND)
         }
+        return decisions
     }
     fun bidding1(): Bid {
         var passesInARow = 0
