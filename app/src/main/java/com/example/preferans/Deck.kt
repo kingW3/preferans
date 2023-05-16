@@ -43,4 +43,10 @@ class Deck() {
         talon.clear()
         player.sortHand()
     }
+    fun copy() : Deck {
+        val copiedDeck = Deck()
+        copiedDeck.cards.addAll(cards)
+        copiedDeck.talon.addAll(talon)
+        return copiedDeck
+    }
 }

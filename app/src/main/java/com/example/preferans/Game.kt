@@ -25,6 +25,7 @@ class Game(val players: List<Player>): Parcelable {
     var selectingGameOver = false
     val log: MutableList<String> = mutableListOf()
     val logTalon: MutableList<String> = mutableListOf()
+    val mainTrick : MutableList<Card> = mutableListOf()
 
     constructor(parcel: Parcel) : this(parcel.createTypedArrayList(Player.CREATOR)!!) {
         bula = parcel.readInt()
@@ -206,5 +207,28 @@ class Game(val players: List<Player>): Parcelable {
         override fun newArray(size: Int): Array<Game?> {
             return arrayOfNulls(size)
         }
+    }
+    fun copy(): Game {
+        val copiedPlayers = players.map { it.copy() }
+        val copiedGame = Game(copiedPlayers)
+        copiedGame.deck = deck.copy()
+        copiedGame.bula = bula
+        copiedGame.currentPlayerIndex = currentPlayerIndex
+        copiedGame.dealerIndex = dealerIndex
+        copiedGame.selectedGame = selectedGame
+        copiedGame.firstRound = firstRound
+        copiedGame.secondRound = secondRound
+        copiedGame.winningBid = winningBid
+        copiedGame.winningBidPlayer = winningBidPlayer?.copy()
+        copiedGame.scores.putAll(scores.mapValues { it.value.toMutableMap() })
+        copiedGame.currentBid = currentBid
+        copiedGame.numOfBids = numOfBids
+        copiedGame.biddingOver = biddingOver
+        copiedGame.defendingDecisionOver = defendingDecisionOver
+        copiedGame.selectingGameOver = selectingGameOver
+        copiedGame.log.addAll(log)
+        copiedGame.logTalon.addAll(logTalon)
+        copiedGame.mainTrick.addAll(mainTrick)
+        return copiedGame
     }
 }

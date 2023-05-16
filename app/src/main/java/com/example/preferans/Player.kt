@@ -64,4 +64,11 @@ class Player(var name: String) : Parcelable {
             return arrayOfNulls(size)
         }
     }
+    fun copy(): Player {
+        val copiedPlayer = Player(name)
+        copiedPlayer.hand.addAll(hand)
+        copiedPlayer.bid = bid
+        copiedPlayer.defendingDecision = defendingDecision
+        return copiedPlayer
+    }
 }

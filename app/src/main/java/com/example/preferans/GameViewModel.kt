@@ -39,6 +39,22 @@ class GameViewModel : ViewModel() {
                     game.deck.talon.add(karta)
                 }
             }
+            else if (game.biddingOver && game.selectingGameOver && game.defendingDecisionOver) {
+                val karta =
+                    game.currentPlayer.discardCard(game.currentPlayer.hand.indexOfFirst { it == card })
+                game.mainTrick.add(karta)
+            }
+            _game.value = game
+        }
+    }
+    fun onCardClickGameTemp(card: Card) {
+        _game.value?.let { game ->
+            game.log.add("${game.currentPlayer.name} clicked the card ${card.toString()}")
+            if (game.biddingOver && game.selectingGameOver && game.defendingDecisionOver) {
+                val karta =
+                    game.currentPlayer.discardCard(game.currentPlayer.hand.indexOfFirst { it == card })
+                game.mainTrick.add(karta)
+            }
             _game.value = game
         }
     }
