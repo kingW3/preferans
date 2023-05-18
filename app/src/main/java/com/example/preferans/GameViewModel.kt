@@ -31,23 +31,48 @@ class GameViewModel : ViewModel() {
     }
     fun onCardClick(card: Card) {
         _game.value?.let { game ->
+            val indexOfCard = game.currentPlayer.hand.indexOfFirst { it == card }
             game.log.add("${game.currentPlayer.name} clicked the card ${card.toString()}")
             if (game.biddingOver && !game.selectingGameOver) {
                 if (game.deck.talon.size < 2) {
                     val karta =
-                        game.currentPlayer.discardCard(game.currentPlayer.hand.indexOfFirst { it == card })
+                        game.currentPlayer.discardCard(indexOfCard)
                     game.deck.talon.add(karta)
                 }
             }
             else if (game.biddingOver && game.selectingGameOver && game.defendingDecisionOver) {
-                val karta =
-                    game.currentPlayer.discardCard(game.currentPlayer.hand.indexOfFirst { it == card })
-                game.mainTrick.add(karta)
+                val noTrickSuitCards = game.currentPlayer.hand.none { it.suit == game.trickSuit }
+                val noTrumpSuitCards = game.currentPlayer.hand.none { it.suit == game.trumpSuit }
+                if(!noTrickSuitCards) {
+                    if(game.currentPlayer.hand[indexOfCard].suit != game.trickSuit) {
+                        game.log.add("You have a card of suit ${game.trickSuit} you must play it")
+                        _game.value = game
+                        return
+                    }
+                }
+                else {
+                    if(game.mainTrick.isNotEmpty() && !noTrumpSuitCards && game.currentPlayer.hand[indexOfCard].suit != game.trumpSuit) {
+                        game.log.add("You have a card of suit ${game.trumpSuit} you must play it")
+                        _game.value = game
+                        return
+                    }
+                }
+                val karta = game.currentPlayer.discardCard(indexOfCard)
+                game.mainTrick[karta] = game.currentPlayer
+                if(game.mainTrick.size == 1) {
+                    game.trickSuit = karta.suit
+                }
+                if(game.mainTrick.size == game.numOfPlayingPlayers) {
+                    game.wonTrick()
+                    _game.value = game
+                    return
+                }
+                moveToNextPlayerPlay(game)
             }
             _game.value = game
         }
     }
-    fun onCardClickGameTemp(card: Card) {
+    /*fun onCardClickGameTemp(card: Card) {
         _game.value?.let { game ->
             game.log.add("${game.currentPlayer.name} clicked the card ${card.toString()}")
             if (game.biddingOver && game.selectingGameOver && game.defendingDecisionOver) {
@@ -57,7 +82,7 @@ class GameViewModel : ViewModel() {
             }
             _game.value = game
         }
-    }
+    }*/
     private fun updateBidCounter(game: Game) {
         ++game.numOfBids
         if (game.numOfBids == game.players.size) {
@@ -88,9 +113,15 @@ class GameViewModel : ViewModel() {
     }
     private fun moveToNextPlayerDefend(game: Game) {
         var player = game.getNextPlayer()
-        if(player == game.winningBidPlayer || player.defendingDecision == PlayerDecision.PASS)
+        while(player == game.winningBidPlayer || player.defendingDecision == PlayerDecision.PASS)
             player = game.getNextPlayer()
         //val defenders =
+    }
+    private fun moveToNextPlayerPlay(game: Game) {
+        var player = game.getNextPlayer()
+        if(player != game.winningBidPlayer && player.defendingDecision == PlayerDecision.PASS && game.players.filter { it.defendingDecision >= PlayerDecision.CALL_PARTNER }
+                .isEmpty())
+            player = game.getNextPlayer()
     }
     private fun handlePlayerTurn(game: Game, player: Player) {
         if (game.winningBidPlayer == player) {
@@ -118,6 +149,7 @@ class GameViewModel : ViewModel() {
             game.selectedGame = selectedGame
             game.log.add("Selected game: $selectedGame")
             game.selectingGameOver = true
+            game.trumpSuit = selectedGame.toSuit()
             game.getNextPlayer()
             //game.startGame(selectedGame)
 
@@ -145,7 +177,7 @@ class GameViewModel : ViewModel() {
             game.currentPlayer.decideDefend(playerDecision)
             //updateBidCounter(game)
             //updateWinningBid(game, bid)
-
+            ++game.numOfDecisions
             // Add a log entry for the placed bid
             game.log.add("${game.currentPlayer.name} placed a bid of $playerDecision")
 
@@ -155,6 +187,7 @@ class GameViewModel : ViewModel() {
             if (PlayerDecision.CALL_PARTNER in decisions) {
                 game.defendingDecisionOver = true
                 // Start game here maybe?
+                game.numOfPlayingPlayers = 3
                 _game.value = game
                 return
             }
@@ -162,6 +195,9 @@ class GameViewModel : ViewModel() {
             if(decisions.filter { it == PlayerDecision.SAME || it == PlayerDecision.PASS }.size == 2) {
                 game.defendingDecisionOver = true
                 // Start game here maybe?
+                game.numOfPlayingPlayers = 3
+                if(decisions.any { it == PlayerDecision.PASS })
+                    game.numOfPlayingPlayers = 2
                 _game.value = game
                 return
             }

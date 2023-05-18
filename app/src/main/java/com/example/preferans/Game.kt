@@ -20,12 +20,16 @@ class Game(val players: List<Player>): Parcelable {
     private val scores: MutableMap<Player, MutableMap<Player, Int>> = mutableMapOf()
     var currentBid : Int = 2*Bid.PASS.value
     var numOfBids = 0
+    var numOfDecisions = 0
+    var numOfPlayingPlayers = -1
     var biddingOver = false
     var defendingDecisionOver = false
     var selectingGameOver = false
+    var trumpSuit : Suit? = null
+    var trickSuit : Suit? = null
     val log: MutableList<String> = mutableListOf()
     val logTalon: MutableList<String> = mutableListOf()
-    val mainTrick : MutableList<Card> = mutableListOf()
+    val mainTrick : MutableMap<Card,Player> = mutableMapOf()
 
     constructor(parcel: Parcel) : this(parcel.createTypedArrayList(Player.CREATOR)!!) {
         bula = parcel.readInt()
@@ -127,14 +131,14 @@ class Game(val players: List<Player>): Parcelable {
     }
 
     fun availableDecisions() : List<PlayerDecision> {
-        val nonVoters = defenders.filter { it.defendingDecision == PlayerDecision.NONE}
+        val nonVoters = players.filter { it.defendingDecision == PlayerDecision.NONE && it != winningBidPlayer}
         val decisions = mutableListOf<PlayerDecision>()
         if(nonVoters.isEmpty())
         {
             decisions.add(PlayerDecision.SAME)
             decisions.add(PlayerDecision.CONTRA)
             //TODO Implement Contra/ReContra/SubContra/MortContra into bidding
-            if(defenders.size == 1) {
+            if((players.filter {it.defendingDecision == PlayerDecision.PASS}).size == 1) {
                 decisions.add(PlayerDecision.CALL_PARTNER)
                 //return PlayerDecision.values().filter {it == PlayerDecision.SAME || it == PlayerDecision.CALL_PARTNER || it == PlayerDecision.CONTRA }
             }
@@ -184,6 +188,52 @@ class Game(val players: List<Player>): Parcelable {
         }
         return decisions
     }
+    fun decideDefend(playerDecision: PlayerDecision) {
+        currentPlayer.decideDefend(playerDecision)
+        ++numOfDecisions
+        // Add a log entry for the placed bid
+        log.add("${currentPlayer.name} placed a bid of $playerDecision")
+
+        // Move to the next player and update the game state
+        val defenders = players.filter { it != winningBidPlayer }
+        val decisions = defenders.map { it.defendingDecision }
+        if (PlayerDecision.CALL_PARTNER in decisions) {
+            defendingDecisionOver = true
+            // Start game here maybe?
+            numOfPlayingPlayers = 3
+            return
+        }
+
+        if (decisions.filter { it == PlayerDecision.SAME || it == PlayerDecision.PASS }.size == 2) {
+            defendingDecisionOver = true
+            // Start game here maybe?
+            numOfPlayingPlayers = 3
+            if (decisions.any { it == PlayerDecision.PASS })
+                numOfPlayingPlayers = 2
+            return
+        }
+        moveToNextPlayerDefend()
+    }
+    private fun moveToNextPlayerDefend() {
+        var player = getNextPlayer()
+        while(player == winningBidPlayer || player.defendingDecision == PlayerDecision.PASS)
+            player = getNextPlayer()
+        //val defenders =
+    }
+    fun wonTrick() : Player {
+        val sortedKeys = mainTrick.entries.sortedWith(compareByDescending<Map.Entry<Card, Player>> { it.key.suit == trumpSuit }
+            .thenByDescending { it.key.suit == trickSuit }
+            .thenByDescending { it.key.rank.value }
+        )
+        val player = sortedKeys[0].value
+        val cards = sortedKeys.map { it.key }
+        player.tricks.add(cards)
+        mainTrick.clear()
+        trickSuit = null
+        log.add("${player.name} won the trick with ${sortedKeys[0].key} and won $cards")
+        currentPlayerIndex = players.indexOf(player)
+        return player
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(bula)
@@ -228,7 +278,7 @@ class Game(val players: List<Player>): Parcelable {
         copiedGame.selectingGameOver = selectingGameOver
         copiedGame.log.addAll(log)
         copiedGame.logTalon.addAll(logTalon)
-        copiedGame.mainTrick.addAll(mainTrick)
+        copiedGame.mainTrick.putAll(mainTrick)
         return copiedGame
     }
 }

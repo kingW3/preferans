@@ -5,6 +5,8 @@ class Player(var name: String) : Parcelable {
     var hand : MutableList<Card> = mutableListOf()
     var bid : Bid = Bid.NONE
     var defendingDecision : PlayerDecision = PlayerDecision.NONE
+    var tricks : MutableList<List<Card>> = mutableListOf()
+    var isPlaying = false
     constructor(parcel: Parcel) : this(parcel.readString()!!) {
         hand = parcel.createTypedArrayList(Card.CREATOR)!!
         bid = Bid.values()[parcel.readInt()]
@@ -27,6 +29,9 @@ class Player(var name: String) : Parcelable {
         val playedCard = hand[cardIndex]
         hand.removeAt(cardIndex)
         return playedCard
+    }
+    fun addTrick(trick: List<Card>) {
+        tricks.add(trick)
     }
     fun placeBid(bid: Bid) : Bid {
         this.bid = bid

@@ -39,4 +39,13 @@ enum class Bid(val value: Int, @StringRes val stringResId: Int) : DisplayNamePro
         Log.d("Bid", "Getting display name for: $this in language: ${context.resources.configuration.locales[0].language}")
         return context.getString(stringResId)
     }
+    fun toSuit(): Suit? {
+        return when (this) {
+            SPADE, GAMESPADE -> Suit.SPADES
+            DIAMOND, GAMEDIAMOND -> Suit.DIAMONDS
+            HEART, GAMEHEART -> Suit.HEARTS
+            CLUB, GAMECLUB -> Suit.CLUBS
+            else -> null
+        }
+    }
 }
