@@ -11,7 +11,7 @@ class GameViewModel : ViewModel() {
     fun createNewGame(players: List<Player>) {
         _game.value = Game(players)
     }
-
+    /*
     fun placeBid(bid: Bid) {
         _game.value?.let { game ->
             // Update the current player's bid
@@ -28,8 +28,16 @@ class GameViewModel : ViewModel() {
             // Notify observers of the updated game state
             _game.value = game
         }
+    }*/
+    fun placeBid(bid: Bid) {
+        game.value?.placeBid(bid)
+        _game.value = game.value
     }
     fun onCardClick(card: Card) {
+        game.value?.onCardClick(card)
+        _game.value = game.value
+    }
+    /*fun onCardClick(card: Card) {
         _game.value?.let { game ->
             val indexOfCard = game.currentPlayer.hand.indexOfFirst { it == card }
             game.log.add("${game.currentPlayer.name} clicked the card ${card.toString()}")
@@ -72,6 +80,20 @@ class GameViewModel : ViewModel() {
             _game.value = game
         }
     }
+    private fun moveToNextPlayerPlay(game: Game) {
+        var player = game.getNextPlayer()
+        if(player != game.winningBidPlayer && player.defendingDecision == PlayerDecision.PASS && game.players.filter { it.defendingDecision >= PlayerDecision.CALL_PARTNER }
+                .isEmpty())
+            player = game.getNextPlayer()
+    }*/
+    fun selectGame(selectedGame: Bid) {
+        game.value?.selectGame(selectedGame)
+        _game.value = game.value
+    }
+    fun decideDefend(playerDecision: PlayerDecision) {
+        game.value?.decideDefend(playerDecision)
+        _game.value = game.value
+    }
     /*fun onCardClickGameTemp(card: Card) {
         _game.value?.let { game ->
             game.log.add("${game.currentPlayer.name} clicked the card ${card.toString()}")
@@ -82,7 +104,7 @@ class GameViewModel : ViewModel() {
             }
             _game.value = game
         }
-    }*/
+    }
     private fun updateBidCounter(game: Game) {
         ++game.numOfBids
         if (game.numOfBids == game.players.size) {
@@ -116,12 +138,6 @@ class GameViewModel : ViewModel() {
         while(player == game.winningBidPlayer || player.defendingDecision == PlayerDecision.PASS)
             player = game.getNextPlayer()
         //val defenders =
-    }
-    private fun moveToNextPlayerPlay(game: Game) {
-        var player = game.getNextPlayer()
-        if(player != game.winningBidPlayer && player.defendingDecision == PlayerDecision.PASS && game.players.filter { it.defendingDecision >= PlayerDecision.CALL_PARTNER }
-                .isEmpty())
-            player = game.getNextPlayer()
     }
     private fun handlePlayerTurn(game: Game, player: Player) {
         if (game.winningBidPlayer == player) {
@@ -206,7 +222,8 @@ class GameViewModel : ViewModel() {
             // Notify observers of the updated game state
             _game.value = game
         }
-    }
+    }*/
+
     fun saveState(outState: Bundle) {
         outState.putParcelable("game_state", game.value)
     }

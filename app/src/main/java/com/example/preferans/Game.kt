@@ -57,6 +57,152 @@ class Game(val players: List<Player>): Parcelable {
         }
     }
 
+    fun placeBid(bid: Bid) {
+            // Update the current player's bid
+            currentPlayer.placeBid(bid)
+            updateBidCounter()
+            updateWinningBid(bid)
+
+            // Add a log entry for the placed bid
+            //
+
+            // Move to the next player and update the game state
+            moveToNextPlayerBid()
+        }
+    private fun updateBidCounter() {
+        ++numOfBids
+        if (numOfBids == players.size) {
+            firstRound = false
+        }
+    }
+    private fun updateWinningBid(bid: Bid) {
+        if (bid >= winningBid) {
+            winningBid = bid
+            winningBidPlayer = currentPlayer
+            currentBid = if (numOfBids <= 2) 2 * bid.value else ++currentBid
+        }
+    }
+    private fun moveToNextPlayerBid() {
+        var player = getNextPlayer()
+        if (players.filter { it.bid != Bid.PASS }.isEmpty())
+        {
+            // TODO end game and start new round
+            return
+        }
+        while (player.bid == Bid.PASS) {
+            ++numOfBids
+            player = getNextPlayer()
+        }
+        handlePlayerTurn(player)
+    }
+    private fun handlePlayerTurn(player: Player) {
+        if (winningBidPlayer == player) {
+            biddingOver = true
+            when {
+                player.bid < Bid.GAME -> {
+                    handleWinningBid(player)
+                }
+                player.bid == Bid.GAME -> {
+                    // TODO: Select the game
+                }
+            }
+        }
+    }
+    private fun handleWinningBid(player: Player) {
+        log.add("${player.name} won the bidding with $winningBid")
+        log.add(deck.talon.joinToString(" "))
+        logTalon.add(deck.talon.joinToString(" "))
+        deck.addTalonToPlayer(player)
+        // TODO: Select suit and discard two cards
+    }
+    fun selectGame(selectedGame: Bid) {
+        this.selectedGame = selectedGame
+        log.add("Selected game: $selectedGame")
+        selectingGameOver = true
+        trumpSuit = selectedGame.toSuit()
+        getNextPlayer()
+        //startGame(selectedGame)
+        }
+    fun decideDefend(playerDecision: PlayerDecision) {
+        // Update the current player's bid
+        currentPlayer.decideDefend(playerDecision)
+        //updateBidCounter(game)
+        //updateWinningBid(game, bid)
+        ++numOfDecisions
+        // Add a log entry for the placed bid
+        log.add("${currentPlayer.name} placed a bid of $playerDecision")
+
+        // Move to the next player and update the game state
+        val defenders = players.filter { it != winningBidPlayer }
+        val decisions = defenders.map { it.defendingDecision }
+        if (PlayerDecision.CALL_PARTNER in decisions) {
+            defendingDecisionOver = true
+            players.forEach { it.isPlaying = true }
+            // Start game here maybe?
+            numOfPlayingPlayers = 3
+            return
+        }
+
+        if(decisions.filter { it == PlayerDecision.SAME || it == PlayerDecision.PASS }.size == 2) {
+            defendingDecisionOver = true
+            // Start game here maybe?
+            //val nonPlaying decisions.filter { it == PlayerDecision.PASS }
+            if(decisions.any { it == PlayerDecision.PASS }) {
+                numOfPlayingPlayers = 2
+
+            }
+            else {
+                numOfPlayingPlayers = 3
+            }
+            return
+        }
+        moveToNextPlayerDefend()
+    }
+    fun onCardClick(card: Card) {
+        val indexOfCard = currentPlayer.hand.indexOfFirst { it == card }
+        log.add("${currentPlayer.name} clicked the card ${card.toString()}")
+        if (biddingOver && !selectingGameOver) {
+            if (deck.talon.size < 2) {
+                val karta =
+                    currentPlayer.discardCard(indexOfCard)
+                deck.talon.add(karta)
+            }
+        }
+        else if (biddingOver && selectingGameOver && defendingDecisionOver) {
+            val noTrickSuitCards = currentPlayer.hand.none { it.suit == trickSuit }
+            val noTrumpSuitCards = currentPlayer.hand.none { it.suit == trumpSuit }
+            if(!noTrickSuitCards) {
+                if(currentPlayer.hand[indexOfCard].suit != trickSuit) {
+                    log.add("You have a card of suit ${trickSuit} you must play it")
+                    return
+                }
+            }
+            else {
+                if(mainTrick.isNotEmpty() && !noTrumpSuitCards && currentPlayer.hand[indexOfCard].suit != trumpSuit) {
+                    log.add("You have a card of suit ${trumpSuit} you must play it")
+                    return
+                }
+            }
+            val karta = currentPlayer.discardCard(indexOfCard)
+            mainTrick[karta] = currentPlayer
+            if(mainTrick.size == 1) {
+                trickSuit = karta.suit
+            }
+            if(mainTrick.size == numOfPlayingPlayers) {
+                wonTrick()
+                return
+            }
+            moveToNextPlayerPlay()
+        }
+    }
+    private fun moveToNextPlayerPlay() {
+        var player = getNextPlayer()
+        /*if(player != winningBidPlayer && player.defendingDecision == PlayerDecision.PASS && players.filter { it.defendingDecision >= PlayerDecision.CALL_PARTNER }
+                .isEmpty())
+            player = getNextPlayer()*/
+        if(!player.isPlaying)
+            player = getNextPlayer()
+    }
     // Other methods...
     fun getNextPlayer(): Player {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size
@@ -188,7 +334,7 @@ class Game(val players: List<Player>): Parcelable {
         }
         return decisions
     }
-    fun decideDefend(playerDecision: PlayerDecision) {
+    /*fun decideDefend(playerDecision: PlayerDecision) {
         currentPlayer.decideDefend(playerDecision)
         ++numOfDecisions
         // Add a log entry for the placed bid
@@ -213,7 +359,7 @@ class Game(val players: List<Player>): Parcelable {
             return
         }
         moveToNextPlayerDefend()
-    }
+    }*/
     private fun moveToNextPlayerDefend() {
         var player = getNextPlayer()
         while(player == winningBidPlayer || player.defendingDecision == PlayerDecision.PASS)

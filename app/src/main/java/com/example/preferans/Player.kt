@@ -57,6 +57,7 @@ class Player(var name: String) : Parcelable {
     fun decideDefend(playerDecision: PlayerDecision) : PlayerDecision
     {
         defendingDecision = playerDecision
+        isPlaying = playerDecision != PlayerDecision.PASS
         return playerDecision
     }
 
